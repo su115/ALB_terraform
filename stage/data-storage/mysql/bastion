@@ -1,0 +1,41 @@
+resource "aws_instance" "bastion" {
+  ami           = "ami-0a8e758f5e873d1c1"
+  instance_type = "t2.micro"
+#  user_data = "${file("install_apache.sh")}"
+  vpc_security_group_ids = [aws_security_group.bastion.id]
+  subnet_id=local.subnet-1
+  associate_public_ip_address = true
+  key_name = "id_rsa"
+  tags = {
+    Name = "2Ubuntu apache2"
+  }
+}
+
+resource "aws_security_group" "bastion" {
+  name = "mysecurity_group-sg-19-22-26"
+  vpc_id=local.network
+  ingress{
+	from_port = 22
+	to_port = 22
+	protocol = "tcp"
+	cidr_blocks = ["0.0.0.0/0"]
+}
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+}
+
+output "ip_bastion"{
+	value=aws_instance.bastion.public_ip
+}
